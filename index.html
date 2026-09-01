@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nişan Daveti</title>
+
+<!--
+  ============================================================
+  KURULUM — SADECE 1 ADIM (yaklaşık 1 dakika)
+  ============================================================
+  1) Google Formunuzu DÜZENLEME ekranında açın.
+  2) Sağ üstteki  ⋮  (üç nokta) menüsü → "Önceden doldurulmuş bağlantı al".
+  3) Açılan formda:
+        - "Adınız Soyadınız" alanına aynen şunu yazın:  ADSOYAD
+        - "Katılacak mısınız?" sorusunda  Evet  seçeneğini işaretleyin.
+  4) Alttaki "Bağlantıyı al" → "Bağlantıyı kopyala".
+  5) Kopyaladığınız linki aşağıdaki PREFILLED_LINK tırnaklarının içine yapıştırın.
+
+  NOT: Formdaki seçenek yazıları tam olarak  Evet  ve  Hayır  olmalı
+       (YES_VALUE / NO_VALUE ile birebir aynı). Farklıysa aşağıdan düzeltin.
+  ============================================================
+-->
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,500;1,600&family=Karla:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --bg: #fbf5f4;
+    --surface: #ffffff;
+    --ink: #2b1e23;
+    --ink-soft: #7c626b;
+    --ink-faint: #a68d94;
+    --border: #ecdcdd;
+    --accent: #a3405a;
+    --accent-ink: #ffffff;
+    --accent-soft: #f7e5e8;
+    --gold: #a5813f;
+    --ok: #2f8f5b;
+    --err: #b3492f;
+    --shadow: 0 18px 40px -22px rgba(43, 30, 35, 0.28);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg: #1c1317;
+      --surface: #251920;
+      --ink: #f4e9ec;
+      --ink-soft: #cbabb6;
+      --ink-faint: #8f717a;
+      --border: #3b2730;
+      --accent: #e592a6;
+      --accent-ink: #2b1217;
+      --accent-soft: #3a222a;
+      --gold: #d6b876;
+      --ok: #5fca8b;
+      --err: #e08469;
+      --shadow: 0 18px 44px -20px rgba(0,0,0,0.55);
+    }
+  }
+
+  *{ box-sizing: border-box; }
+  html, body{ height: 100%; }
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Karla", -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 18px;
+  }
+  ::selection{ background: var(--accent-soft); color: var(--ink); }
+  :focus-visible{ outline: 2px solid var(--accent); outline-offset: 3px; }
+  img{ max-width: 100%; }
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+
+  .stage{ width: 100%; max-width: 460px; }
+
+  .card{
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    box-shadow: var(--shadow);
+    padding: 46px 34px 36px;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .rings{ width: 46px; height: 28px; margin: 0 auto 18px; color: var(--gold); opacity: 0.9; }
+  .eyebrow{
+    font-size: 11.5px; font-weight: 600; letter-spacing: 0.24em;
+    text-transform: uppercase; color: var(--gold); margin: 0 0 14px;
+  }
+  h1{
+    font-family: "Newsreader", Georgia, serif;
+    font-style: italic; font-weight: 500;
+    font-size: clamp(26px, 6.2vw, 32px);
+    line-height: 1.32; color: var(--ink);
+    margin: 0 0 30px; text-wrap: balance;
+  }
+
+  .field{ text-align: left; margin-bottom: 20px; }
+  .field label{
+    display: block; font-size: 12px; font-weight: 600; letter-spacing: 0.03em;
+    color: var(--ink-soft); margin: 0 0 7px 2px;
+  }
+  .field input{
+    width: 100%; background: var(--accent-soft);
+    border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 13px 15px; font-family: inherit; font-size: 15.5px;
+    color: var(--ink); transition: border-color .15s ease;
+  }
+  .field input::placeholder{ color: var(--ink-faint); }
+  .field input:focus-visible{ border-color: var(--accent); outline: none; }
+
+  .choices{ display: flex; gap: 10px; }
+  .choice{
+    flex: 1; font-family: inherit; font-size: 15px; font-weight: 600;
+    padding: 13px 10px; border-radius: 12px; border: 1.5px solid var(--border);
+    background: transparent; color: var(--ink-soft); cursor: pointer;
+    transition: background .16s ease, border-color .16s ease, color .16s ease, transform .12s ease, opacity .16s ease;
+  }
+  .choice:hover:not([disabled]){ border-color: var(--accent); color: var(--ink); }
+  .choice:active:not([disabled]){ transform: scale(0.98); }
+  .choice[aria-pressed="true"]{ background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .choice.no[aria-pressed="true"]{ background: var(--ink-faint); border-color: var(--ink-faint); color: var(--surface); }
+  .choice[disabled]{ opacity: 0.45; cursor: not-allowed; }
+
+  .hint{
+    font-size: 12.5px; color: var(--ink-faint);
+    margin: 12px 0 0; min-height: 16px; transition: color .2s ease;
+  }
+  .hint.warn{ color: var(--accent); }
+
+  .reveal{
+    display: grid; grid-template-rows: 0fr; opacity: 0;
+    transition: grid-template-rows .38s ease, opacity .32s ease .02s, margin-top .38s ease;
+    margin-top: 0;
+  }
+  .reveal.open{ grid-template-rows: 1fr; opacity: 1; margin-top: 22px; }
+  .reveal-inner{ overflow: hidden; }
+
+  .divider{ width: 40px; height: 1px; background: var(--border); margin: 0 auto 18px; }
+
+  .status{
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 13px; font-weight: 600; color: var(--ok);
+    margin: 0 0 16px;
+  }
+  .status svg{ width: 16px; height: 16px; }
+  .status.pending{ color: var(--ink-faint); }
+  .status.err{ color: var(--err); }
+
+  .reveal-text{ font-size: 14.5px; color: var(--ink-soft); line-height: 1.6; margin: 0 0 18px; }
+
+  .map-panel{
+    background: var(--accent-soft); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px 18px 16px;
+  }
+  .map-glyph{ width: 22px; height: 22px; color: var(--accent); margin: 0 auto 8px; }
+  .venue-label{ font-family: "Newsreader", Georgia, serif; font-style: italic; font-size: 17px; color: var(--ink); margin: 0 0 3px; }
+  .venue-addr{ font-size: 13px; color: var(--ink-soft); margin: 0 0 14px; }
+
+  .btn{
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    text-decoration: none; font-family: inherit; font-size: 14px; font-weight: 600;
+    padding: 12px 20px; border-radius: 999px; border: 1.5px solid transparent;
+    cursor: pointer; transition: opacity .15s ease, transform .12s ease, border-color .15s ease;
+  }
+  .btn:active{ transform: scale(0.98); }
+  .btn svg{ width: 16px; height: 16px; flex: none; }
+  .btn-map{ background: transparent; color: var(--accent); border-color: var(--border); width: 100%; }
+  .btn-map:hover{ border-color: var(--accent); }
+
+  .no-text{ font-family: "Newsreader", Georgia, serif; font-style: italic; font-size: 17px; color: var(--ink-soft); margin: 0; padding-top: 2px; }
+
+  .setup-warn{
+    display: none;
+    margin: 0 0 22px; padding: 12px 14px;
+    background: rgba(179,73,47,.08); border: 1px solid var(--err);
+    border-radius: 12px; text-align: left;
+    font-size: 12.5px; color: var(--err); line-height: 1.5;
+  }
+  .setup-warn.show{ display: block; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="card">
+
+    <div class="setup-warn" id="setupWarn">
+      <strong>Kurulum tamamlanmadı:</strong> Dosyadaki <code>PREFILLED_LINK</code> satırına
+      formunuzun "önceden doldurulmuş bağlantısını" yapıştırın. (Dosyanın en üstündeki
+      açıklamaya bakın.) Bu yapılmadan cevaplar E-Tabloya kaydedilmez.
+    </div>
+
+    <svg class="rings" viewBox="0 0 46 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="17" cy="16" r="10.5" stroke="currentColor" stroke-width="1.6"/>
+      <circle cx="29" cy="16" r="10.5" stroke="currentColor" stroke-width="1.6"/>
+    </svg>
+
+    <p class="eyebrow">Nişan Daveti</p>
+    <h1>3 Ekim'deki nişana katılacak mısınız?</h1>
+
+    <div class="field">
+      <label for="guestName">Adınız Soyadınız</label>
+      <input id="guestName" type="text" placeholder="Örn. Ayşe Yılmaz" autocomplete="name" spellcheck="false" maxlength="60">
+    </div>
+
+    <div class="choices" role="group" aria-label="Katılım cevabı">
+      <button class="choice yes" id="btnYes" type="button" aria-pressed="false" disabled>Evet</button>
+      <button class="choice no" id="btnNo" type="button" aria-pressed="false" disabled>Hayır</button>
+    </div>
+
+    <p class="hint" id="hint" aria-live="polite">Cevap vermek için lütfen önce adınızı yazın.</p>
+
+    <!-- Evet -->
+    <div class="reveal" id="revealYes">
+      <div class="reveal-inner">
+        <div class="divider"></div>
+        <p class="status" id="statusYes"></p>
+        <p class="reveal-text">Ne mutlu bize! Sizi orada görmek için sabırsızlanıyoruz.</p>
+        <div class="map-panel">
+          <svg class="map-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.1-7-11.2A7 7 0 0 1 19 9.8C19 14.9 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>
+          <p class="venue-label">Nişan Mekânı</p>
+          <p class="venue-addr">Banaz, Uşak</p>
+          <a class="btn btn-map" href="https://www.google.com/maps/search/?api=1&amp;query=38.695241,29.717804" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l-5 2V6l5-2 6 2 5-2v14l-5 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg>
+            Haritada Aç
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hayır -->
+    <div class="reveal" id="revealNo">
+      <div class="reveal-inner">
+        <div class="divider"></div>
+        <p class="status" id="statusNo"></p>
+        <p class="no-text">Sizi özleyeceğiz. Nazik cevabınız için teşekkür ederiz.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  /* ======================= AYARLAR ======================= */
+  // Buraya formunuzun "önceden doldurulmuş bağlantısını" yapıştırın
+  // (kurulum adımları dosyanın en üstündeki açıklamada).
+  const PREFILLED_LINK = "";
+
+  // Prefilled linki oluştururken isim alanına ADSOYAD yazıp Evet'i seçtiyseniz
+  // aşağıyı değiştirmenize gerek yok.
+  const SAMPLE_NAME = "ADSOYAD";
+  const YES_VALUE = "Evet";   // formdaki seçenek yazısıyla birebir aynı olmalı
+  const NO_VALUE  = "Hayır";  // formdaki seçenek yazısıyla birebir aynı olmalı
+  /* ====================================================== */
+
+  // --- Linkten form bilgilerini çıkar ---
+  let RESPONSE_URL = "", NAME_ENTRY = "", ATTEND_ENTRY = "", configured = false;
+  try {
+    if (PREFILLED_LINK.trim()){
+      const u = new URL(PREFILLED_LINK.trim());
+      RESPONSE_URL = u.origin + u.pathname.replace(/\/viewform.*$/, "/formResponse");
+      u.searchParams.forEach((v, k) => {
+        if (v === SAMPLE_NAME) NAME_ENTRY = k;
+        else if (v === YES_VALUE) ATTEND_ENTRY = k;
+      });
+      configured = Boolean(RESPONSE_URL && NAME_ENTRY && ATTEND_ENTRY);
+    }
+  } catch (e){ configured = false; }
+
+  const setupWarn = document.getElementById('setupWarn');
+  if (!configured) setupWarn.classList.add('show');
+
+  const nameInput = document.getElementById('guestName');
+  const btnYes = document.getElementById('btnYes');
+  const btnNo  = document.getElementById('btnNo');
+  const hint   = document.getElementById('hint');
+  const revealYes = document.getElementById('revealYes');
+  const revealNo  = document.getElementById('revealNo');
+  const statusYes = document.getElementById('statusYes');
+  const statusNo  = document.getElementById('statusNo');
+
+  let answer = null;
+  let locked = false; // aynı kişi tekrar tekrar kaydolmasın
+
+  function nameValue(){ return nameInput.value.trim(); }
+  function hasName(){ return nameValue().length >= 2; }
+
+  const iconCheck = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  const iconDots  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>';
+
+  function updateEnabled(){
+    const ok = hasName();
+    btnYes.disabled = !ok || locked;
+    btnNo.disabled = !ok || locked;
+    if (!answer){
+      hint.textContent = ok ? "Lütfen cevabınızı seçin." : "Cevap vermek için lütfen önce adınızı yazın.";
+      hint.classList.remove('warn');
+    }
+  }
+
+  // Google Form'a arka planda sessiz gönderim (GitHub Pages gibi normal
+  // barındırmada çalışır; claude.ai içinde çalışmaz).
+  function sendToGoogle(attendValue){
+    if (!configured) return Promise.resolve(false);
+    const fd = new FormData();
+    fd.append(NAME_ENTRY, nameValue());
+    fd.append(ATTEND_ENTRY, attendValue);
+    return fetch(RESPONSE_URL, { method: "POST", mode: "no-cors", body: fd })
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  function setStatus(el, state){
+    el.classList.remove('pending','err');
+    if (state === 'pending'){ el.classList.add('pending'); el.innerHTML = iconDots + " Kaydediliyor…"; }
+    else if (state === 'ok'){ el.innerHTML = iconCheck + " Cevabınız kaydedildi"; }
+    else if (state === 'err'){ el.classList.add('err'); el.textContent = "Kayıt yapılamadı — lütfen bağlantınızı kontrol edin."; }
+    else if (state === 'unconfigured'){ el.classList.add('err'); el.textContent = "Kurulum tamamlanmadı — cevap kaydedilmedi."; }
+  }
+
+  function choose(a){
+    if (locked) return;
+    if (!hasName()){
+      hint.textContent = "Devam etmek için lütfen önce adınızı yazın.";
+      hint.classList.add('warn');
+      nameInput.focus();
+      return;
+    }
+    answer = a;
+    locked = true;
+    hint.textContent = "";
+    hint.classList.remove('warn');
+
+    const isYes = a === 'yes';
+    btnYes.setAttribute('aria-pressed', String(isYes));
+    btnNo.setAttribute('aria-pressed', String(!isYes));
+    btnYes.disabled = true;
+    btnNo.disabled = true;
+    nameInput.disabled = true;
+    revealYes.classList.toggle('open', isYes);
+    revealNo.classList.toggle('open', !isYes);
+
+    const statusEl = isYes ? statusYes : statusNo;
+    const attendValue = isYes ? YES_VALUE : NO_VALUE;
+
+    if (!configured){ setStatus(statusEl, 'unconfigured'); return; }
+    setStatus(statusEl, 'pending');
+    sendToGoogle(attendValue).then(ok => setStatus(statusEl, ok ? 'ok' : 'err'));
+  }
+
+  nameInput.addEventListener('input', updateEnabled);
+  btnYes.addEventListener('click', () => choose('yes'));
+  btnNo.addEventListener('click', () => choose('no'));
+
+  updateEnabled();
+</script>
+</body>
+</html>
