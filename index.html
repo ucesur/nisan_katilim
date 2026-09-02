@@ -4,14 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nişan Daveti</title>
-
 <!--
   ==================================================================
   KURULUM — cevaplar DOĞRUDAN Google E-Tablonuza yazılır (form yok)
   ==================================================================
   ADIM 1) Google E-Tablonuzu açın → üst menü: Uzantılar → Apps Komut Dosyası.
   ADIM 2) Açılan editördeki her şeyi silin, aşağıdaki kodu yapıştırın:
-
       function doPost(e){
         var ss = SpreadsheetApp.getActiveSpreadsheet();
         var sh = ss.getSheetByName('Katılım');
@@ -20,18 +18,15 @@
         sh.appendRow([new Date(), p.name || '', p.answer || '']);
         return ContentService.createTextOutput('OK');
       }
-
   ADIM 3) Sağ üstte "Dağıt" (Deploy) → "Yeni dağıtım" → tür: "Web uygulaması".
           - "Şu kimlikle çalıştır": Ben (kendiniz)
           - "Erişebilecek kişiler": Herkes (Anyone)
           Dağıt deyin, izin isterse onaylayın, size bir "Web uygulaması URL'si" verir.
   ADIM 4) O URL'yi kopyalayıp aşağıdaki WEBAPP_URL tırnaklarının içine yapıştırın.
-
   Not: Cevaplar E-Tablonuzda "Katılım" sekmesine (Tarih / Ad Soyad / Cevap)
        satır satır düşer. Artık Google Form'a gerek yok.
   ==================================================================
 -->
-
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,500;1,600&family=Karla:wght@400;500;600;700&display=swap">
 <style>
   :root{
@@ -66,7 +61,6 @@
       --shadow: 0 18px 44px -20px rgba(0,0,0,0.55);
     }
   }
-
   *{ box-sizing: border-box; }
   html, body{ height: 100%; }
   body{
@@ -86,9 +80,7 @@
   @media (prefers-reduced-motion: reduce){
     *{ animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
   }
-
   .stage{ width: 100%; max-width: 460px; }
-
   .card{
     position: relative;
     background: var(--surface);
@@ -99,7 +91,6 @@
     text-align: center;
     overflow: hidden;
   }
-
   .rings{ width: 46px; height: 28px; margin: 0 auto 18px; color: var(--gold); opacity: 0.9; }
   .eyebrow{
     font-size: 11.5px; font-weight: 600; letter-spacing: 0.24em;
@@ -110,9 +101,8 @@
     font-style: italic; font-weight: 500;
     font-size: clamp(26px, 6.2vw, 32px);
     line-height: 1.32; color: var(--ink);
-    margin: 0 0 30px; text-wrap: balance;
+    margin: 0 0 26px; text-wrap: balance;
   }
-
   .field{ text-align: left; margin-bottom: 20px; }
   .field label{
     display: block; font-size: 12px; font-weight: 600; letter-spacing: 0.03em;
@@ -126,7 +116,6 @@
   }
   .field input::placeholder{ color: var(--ink-faint); }
   .field input:focus-visible{ border-color: var(--accent); outline: none; }
-
   .choices{ display: flex; gap: 10px; }
   .choice{
     flex: 1; font-family: inherit; font-size: 15px; font-weight: 600;
@@ -139,13 +128,11 @@
   .choice[aria-pressed="true"]{ background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
   .choice.no[aria-pressed="true"]{ background: var(--ink-faint); border-color: var(--ink-faint); color: var(--surface); }
   .choice[disabled]{ opacity: 0.45; cursor: not-allowed; }
-
   .hint{
     font-size: 12.5px; color: var(--ink-faint);
     margin: 12px 0 0; min-height: 16px; transition: color .2s ease;
   }
   .hint.warn{ color: var(--accent); }
-
   .reveal{
     display: grid; grid-template-rows: 0fr; opacity: 0;
     transition: grid-template-rows .38s ease, opacity .32s ease .02s, margin-top .38s ease;
@@ -153,28 +140,24 @@
   }
   .reveal.open{ grid-template-rows: 1fr; opacity: 1; margin-top: 22px; }
   .reveal-inner{ overflow: hidden; }
-
   .divider{ width: 40px; height: 1px; background: var(--border); margin: 0 auto 18px; }
-
   .status{
     display: inline-flex; align-items: center; gap: 7px;
     font-size: 13px; font-weight: 600; color: var(--ok);
-    margin: 0 0 16px;
+    margin: 0;
   }
   .status svg{ width: 16px; height: 16px; }
   .status.pending{ color: var(--ink-faint); }
   .status.err{ color: var(--err); }
-
-  .reveal-text{ font-size: 14.5px; color: var(--ink-soft); line-height: 1.6; margin: 0 0 18px; }
-
+  .reveal-text{ font-size: 14.5px; color: var(--ink-soft); line-height: 1.6; margin: 14px 0 0; }
   .map-panel{
     background: var(--accent-soft); border: 1px solid var(--border);
     border-radius: 14px; padding: 18px 18px 16px;
+    margin: 0 0 24px;
   }
   .map-glyph{ width: 22px; height: 22px; color: var(--accent); margin: 0 auto 8px; }
   .venue-label{ font-family: "Newsreader", Georgia, serif; font-style: italic; font-size: 17px; color: var(--ink); margin: 0 0 3px; }
   .venue-addr{ font-size: 13px; color: var(--ink-soft); margin: 0 0 14px; }
-
   .btn{
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     text-decoration: none; font-family: inherit; font-size: 14px; font-weight: 600;
@@ -185,9 +168,7 @@
   .btn svg{ width: 16px; height: 16px; flex: none; }
   .btn-map{ background: transparent; color: var(--accent); border-color: var(--border); width: 100%; }
   .btn-map:hover{ border-color: var(--accent); }
-
-  .no-text{ font-family: "Newsreader", Georgia, serif; font-style: italic; font-size: 17px; color: var(--ink-soft); margin: 0; padding-top: 2px; }
-
+  .no-text{ font-family: "Newsreader", Georgia, serif; font-style: italic; font-size: 17px; color: var(--ink-soft); margin: 14px 0 0; }
   .setup-warn{
     display: none;
     margin: 0 0 22px; padding: 12px 14px;
@@ -202,31 +183,37 @@
 <body>
 <div class="stage">
   <div class="card">
-
     <div class="setup-warn" id="setupWarn">
       <strong>Kurulum tamamlanmadı:</strong> Dosyadaki <code>WEBAPP_URL</code> satırına
       E-Tablonuzun "web uygulaması" adresini yapıştırın. (Adımlar dosyanın en üstünde.)
       Bu yapılmadan cevaplar tabloya yazılmaz.
     </div>
-
     <svg class="rings" viewBox="0 0 46 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <circle cx="17" cy="16" r="10.5" stroke="currentColor" stroke-width="1.6"/>
       <circle cx="29" cy="16" r="10.5" stroke="currentColor" stroke-width="1.6"/>
     </svg>
-
     <p class="eyebrow">Nişan Daveti</p>
     <h1>3 Ekim'deki nişana katılacak mısınız?</h1>
+
+    <!-- Mekân ve harita: her zaman görünür -->
+    <div class="map-panel">
+      <svg class="map-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.1-7-11.2A7 7 0 0 1 19 9.8C19 14.9 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>
+      <p class="venue-label">Nişan Mekânı</p>
+      <p class="venue-addr">Banaz, Uşak</p>
+      <a class="btn btn-map" href="https://www.google.com/maps/search/?api=1&amp;query=38.695241,29.717804" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l-5 2V6l5-2 6 2 5-2v14l-5 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg>
+        Haritada Aç
+      </a>
+    </div>
 
     <div class="field">
       <label for="guestName">Adınız Soyadınız</label>
       <input id="guestName" type="text" placeholder="Örn. Ayşe Yılmaz" autocomplete="name" spellcheck="false" maxlength="60">
     </div>
-
     <div class="choices" role="group" aria-label="Katılım cevabı">
       <button class="choice yes" id="btnYes" type="button" aria-pressed="false" disabled>Evet</button>
       <button class="choice no" id="btnNo" type="button" aria-pressed="false" disabled>Hayır</button>
     </div>
-
     <p class="hint" id="hint" aria-live="polite">Cevap vermek için lütfen önce adınızı yazın.</p>
 
     <!-- Evet -->
@@ -235,18 +222,8 @@
         <div class="divider"></div>
         <p class="status" id="statusYes"></p>
         <p class="reveal-text">Ne mutlu bize! Sizi orada görmek için sabırsızlanıyoruz.</p>
-        <div class="map-panel">
-          <svg class="map-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.1-7-11.2A7 7 0 0 1 19 9.8C19 14.9 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>
-          <p class="venue-label">Nişan Mekânı</p>
-          <p class="venue-addr">Banaz, Uşak</p>
-          <a class="btn btn-map" href="https://www.google.com/maps/search/?api=1&amp;query=38.695241,29.717804" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l-5 2V6l5-2 6 2 5-2v14l-5 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg>
-            Haritada Aç
-          </a>
-        </div>
       </div>
     </div>
-
     <!-- Hayır -->
     <div class="reveal" id="revealNo">
       <div class="reveal-inner">
@@ -255,25 +232,19 @@
         <p class="no-text">Sizi özleyeceğiz. Nazik cevabınız için teşekkür ederiz.</p>
       </div>
     </div>
-
   </div>
 </div>
-
 <script>
   /* ======================= AYAR (tek satır) ======================= */
   // E-Tablonuza bağlı Apps Script "web uygulaması" adresini buraya yapıştırın.
   // (Nasıl alınır: dosyanın en üstündeki KURULUM adımları.)
   const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyWFei9hpERt7mWan86NyKcsZDlRHX2J1ENcuueQEllVOyLJQGy1UvvpO_gjTyfupbVeA/exec";
   /* =============================================================== */
-
   const YES_VALUE = "Evet";
   const NO_VALUE  = "Hayır";
-
   const configured = /^https:\/\/script\.google\.com\//.test(WEBAPP_URL.trim());
-
   const setupWarn = document.getElementById('setupWarn');
   if (!configured) setupWarn.classList.add('show');
-
   const nameInput = document.getElementById('guestName');
   const btnYes = document.getElementById('btnYes');
   const btnNo  = document.getElementById('btnNo');
@@ -282,16 +253,12 @@
   const revealNo  = document.getElementById('revealNo');
   const statusYes = document.getElementById('statusYes');
   const statusNo  = document.getElementById('statusNo');
-
   let answer = null;
   let locked = false;
-
   function nameValue(){ return nameInput.value.trim(); }
   function hasName(){ return nameValue().length >= 2; }
-
   const iconCheck = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
   const iconDots  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>';
-
   function updateEnabled(){
     const ok = hasName();
     btnYes.disabled = !ok || locked;
@@ -301,7 +268,6 @@
       hint.classList.remove('warn');
     }
   }
-
   // Cevabı doğrudan E-Tabloya (Apps Script web uygulaması) yazar.
   // GitHub Pages gibi normal barındırmada çalışır; claude.ai içinde çalışmaz.
   function sendToSheet(attendValue){
@@ -311,7 +277,6 @@
       .then(() => true)
       .catch(() => false);
   }
-
   function setStatus(el, state){
     el.classList.remove('pending','err');
     if (state === 'pending'){ el.classList.add('pending'); el.innerHTML = iconDots + " Kaydediliyor…"; }
@@ -319,7 +284,6 @@
     else if (state === 'err'){ el.classList.add('err'); el.textContent = "Kayıt yapılamadı — lütfen bağlantıyı kontrol edin."; }
     else if (state === 'unconfigured'){ el.classList.add('err'); el.textContent = "Kurulum tamamlanmadı — cevap kaydedilmedi."; }
   }
-
   function choose(a){
     if (locked) return;
     if (!hasName()){
@@ -332,7 +296,6 @@
     locked = true;
     hint.textContent = "";
     hint.classList.remove('warn');
-
     const isYes = a === 'yes';
     btnYes.setAttribute('aria-pressed', String(isYes));
     btnNo.setAttribute('aria-pressed', String(!isYes));
@@ -341,19 +304,15 @@
     nameInput.disabled = true;
     revealYes.classList.toggle('open', isYes);
     revealNo.classList.toggle('open', !isYes);
-
     const statusEl = isYes ? statusYes : statusNo;
     const attendValue = isYes ? YES_VALUE : NO_VALUE;
-
     if (!configured){ setStatus(statusEl, 'unconfigured'); return; }
     setStatus(statusEl, 'pending');
     sendToSheet(attendValue).then(ok => setStatus(statusEl, ok ? 'ok' : 'err'));
   }
-
   nameInput.addEventListener('input', updateEnabled);
   btnYes.addEventListener('click', () => choose('yes'));
   btnNo.addEventListener('click', () => choose('no'));
-
   updateEnabled();
 </script>
 </body>
