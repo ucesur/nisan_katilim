@@ -12,41 +12,56 @@
   ADIM 2) Açılan editördeki her şeyi silin, aşağıdaki kodun TAMAMINI yapıştırın:
 
       function doPost(e){
-        var ss = SpreadsheetApp.getActiveSpreadsheet();
-        var sh = ss.getSheetByName('Katılım');
-        if(!sh){ sh = ss.insertSheet('Katılım'); sh.appendRow(['Tarih','Ad Soyad','Cevap']); }
-        var p = (e && e.parameter) || {};
-        sh.appendRow([new Date(), p.name || '', p.answer || '']);
-        return ContentService.createTextOutput('OK');
+        return handle_(e);
       }
-
       function doGet(e){
+        return handle_(e);
+      }
+      function handle_(e){
         var p = (e && e.parameter) || {};
         var cb = p.callback || 'callback';
-        var ss = SpreadsheetApp.getActiveSpreadsheet();
-        var sh = ss.getSheetByName('Katılım');
-        var exists = false;
-        var last = sh ? sh.getLastRow() : 0;
-        if (sh && p.name && last >= 2){
-          var target = String(p.name).trim().toLowerCase();
-          var vals = sh.getRange(2, 2, last - 1, 1).getValues();
-          for (var i = 0; i < vals.length; i++){
-            if (String(vals[i][0]).trim().toLowerCase() === target){ exists = true; break; }
+        var out = { status: 'error' };
+        try {
+          var ss = SpreadsheetApp.getActiveSpreadsheet();
+          var sh = ss.getSheetByName('Katılım');
+          if(!sh){ sh = ss.insertSheet('Katılım'); sh.appendRow(['Tarih','Ad Soyad','Cevap']); }
+          var name = (p.name || '').toString().trim();
+          var answer = (p.answer || '').toString().trim();
+          var last = sh.getLastRow();
+          var exists = false;
+          if (name && last >= 2){
+            var vals = sh.getRange(2, 2, last - 1, 1).getValues();
+            var target = name.toLowerCase();
+            for (var i = 0; i < vals.length; i++){
+              if (String(vals[i][0]).trim().toLowerCase() === target){ exists = true; break; }
+            }
           }
-        }
+          if (p.mode === 'save'){
+            if (exists){ out = { status: 'exists' }; }
+            else if (name && answer){ sh.appendRow([new Date(), name, answer]); out = { status: 'saved' }; }
+            else { out = { status: 'invalid' }; }
+          } else {
+            out = { status: 'ok', exists: exists };
+          }
+        } catch(err){ out = { status: 'error', message: String(err) }; }
         return ContentService
-          .createTextOutput(cb + '(' + JSON.stringify({ exists: exists }) + ')')
+          .createTextOutput(cb + '(' + JSON.stringify(out) + ')')
           .setMimeType(ContentService.MimeType.JAVASCRIPT);
       }
 
   ADIM 3) Sağ üstte "Dağıt" (Deploy) → "Yeni dağıtım" → tür: "Web uygulaması".
           - "Şu kimlikle çalıştır": Ben (kendiniz)
-          - "Erişebilecek kişiler": Herkes (Anyone)
+          - "Erişebilecek kişiler": HERKES  (mutlaka "Herkes", "Google hesabı olan herkes" DEĞİL)
           Dağıt deyin, izin isterse onaylayın, size bir "Web uygulaması URL'si" verir.
 
-  >>> ÖNEMLİ: Daha önce dağıttıysanız, yeni doGet kodunun geçerli olması için
-      "Dağıt → Dağıtımları yönet → (kalem/düzenle) → Sürüm: Yeni sürüm → Dağıt"
-      yapın. URL aynı kalır, yeniden yapıştırmanıza gerek yok.
+  >>> ÇOK ÖNEMLİ: Daha önce dağıttıysanız, yeni kodun geçerli olması için MUTLAKA
+      "Dağıt → Dağıtımları yönet → (kalem/düzenle) → Sürüm: YENİ SÜRÜM → Dağıt"
+      yapın. Aksi halde eski kod çalışmaya devam eder ve isim kontrolü işlemez.
+      URL aynı kalır.
+
+  TEST: Tarayıcıda şu adresi açın (URL'nizi yazın):
+        .../exec?callback=test&name=deneme
+        "test({"status":"ok","exists":false})" gibi bir cevap görürseniz kod çalışıyordur.
 
   ADIM 4) URL'yi aşağıdaki WEBAPP_URL tırnaklarının içine yapıştırın.
   ==================================================================
@@ -127,7 +142,7 @@
     line-height: 1.32; color: var(--ink);
     margin: 0 0 26px; text-wrap: balance;
   }
-  .field{ text-align: left; margin-bottom: 20px; }
+  .field{ text-align: left; margin-bottom: 16px; }
   .field label{
     display: block; font-size: 12px; font-weight: 600; letter-spacing: 0.03em;
     color: var(--ink-soft); margin: 0 0 7px 2px;
@@ -155,7 +170,7 @@
   .choice[disabled]{ opacity: 0.45; cursor: not-allowed; }
   .hint{
     font-size: 12.5px; color: var(--ink-faint);
-    margin: 12px 0 0; min-height: 16px; transition: color .2s ease;
+    margin: 0 0 16px; min-height: 16px; transition: color .2s ease;
   }
   .hint.warn{ color: var(--accent); }
   .hint.info{ color: var(--gold); }
@@ -182,7 +197,7 @@
     display: block;
     background: var(--accent-soft); border: 1px solid var(--border);
     border-radius: 14px; padding: 18px 18px 16px;
-    margin: 0 0 24px;
+    margin: 24px 0 0;
     text-decoration: none; color: inherit; cursor: pointer;
     transition: border-color .15s ease, transform .12s ease;
   }
@@ -229,7 +244,6 @@
     </svg>
     <p class="eyebrow">Nişan Daveti</p>
     <h1>3 Ekim'deki nişana katılacak mısınız?</h1>
-
     <div class="field">
       <label for="guestName">Adınız Soyadınız</label>
       <input id="guestName" type="text" placeholder="Örn. Ayşe Yılmaz" autocomplete="name" spellcheck="false" maxlength="60">
@@ -239,8 +253,6 @@
       <button class="choice yes" id="btnYes" type="button" aria-pressed="false" disabled>Evet</button>
       <button class="choice no" id="btnNo" type="button" aria-pressed="false" disabled>Hayır</button>
     </div>
-
-
     <!-- Evet -->
     <div class="reveal" id="revealYes">
       <div class="reveal-inner">
@@ -257,7 +269,6 @@
         <p class="no-text" id="descNo">Sizi özleyeceğiz. Nazik cevabınız için teşekkür ederiz.</p>
       </div>
     </div>
-
     <!-- Mekân ve harita: her zaman görünür, tüm kart tıklanabilir -->
     <a class="map-panel" href="https://www.google.com/maps/search/?api=1&amp;query=38.695241,29.717804" target="_blank" rel="noopener" aria-label="Nişan mekânını haritada aç: Banaz, Uşak">
       <svg class="map-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.1-7-11.2A7 7 0 0 1 19 9.8C19 14.9 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>
@@ -292,11 +303,10 @@
   const descYes = document.getElementById('descYes');
   const descNo  = document.getElementById('descNo');
   let answer = null;
-  let locked = false;   // cevap verildi, kilitlendi
-  let busy = false;     // kontrol/gönderim sürüyor
+  let locked = false;   // cevap kesinleşti, kilitlendi
+  let busy = false;     // gönderim sürüyor
   function nameValue(){ return nameInput.value.trim(); }
   function hasName(){ return nameValue().length >= 2; }
-
   const iconCheck = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
   const iconDots  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>';
   const iconInfo  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>';
@@ -311,43 +321,41 @@
     }
   }
 
-  // --- E-Tablodan ismin daha önce girilip girilmediğini kontrol et (JSONP) ---
-  function checkName(name){
+  // --- Tek çağrıda: sunucuda isim kontrolü + (yoksa) kayıt. JSONP ile okunur. ---
+  function callServer(params){
     return new Promise((resolve) => {
       if (!configured){ resolve(null); return; }
       const cb = 'jsonp_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
       let s;
-      const timer = setTimeout(() => { cleanup(); resolve(null); }, 9000);
+      const timer = setTimeout(() => { cleanup(); resolve(null); }, 12000);
       function cleanup(){
         try { delete window[cb]; } catch(e){ window[cb] = undefined; }
         if (s && s.parentNode) s.parentNode.removeChild(s);
         clearTimeout(timer);
       }
-      window[cb] = (data) => { cleanup(); resolve(data && data.exists === true); };
+      window[cb] = (data) => { cleanup(); resolve(data || null); };
+      const usp = new URLSearchParams(params);
+      usp.set('callback', cb);
       s = document.createElement('script');
-      s.src = WEBAPP_URL.trim() + '?callback=' + cb + '&name=' + encodeURIComponent(name);
+      s.src = WEBAPP_URL.trim() + '?' + usp.toString();
       s.onerror = () => { cleanup(); resolve(null); };
       document.body.appendChild(s);
     });
   }
 
-  // --- Cevabı doğrudan E-Tabloya yazar ---
-  function sendToSheet(attendValue){
-    if (!configured) return Promise.resolve(false);
-    const body = new URLSearchParams({ name: nameValue(), answer: attendValue });
-    return fetch(WEBAPP_URL.trim(), { method: "POST", mode: "no-cors", body })
-      .then(() => true)
-      .catch(() => false);
-  }
-
   function setStatus(el, state){
     el.classList.remove('pending','err','info');
-    if (state === 'checking'){ el.classList.add('pending'); el.innerHTML = iconDots + " Kontrol ediliyor…"; }
-    else if (state === 'pending'){ el.classList.add('pending'); el.innerHTML = iconDots + " Kaydediliyor…"; }
+    if (state === 'pending'){ el.classList.add('pending'); el.innerHTML = iconDots + " Kaydediliyor…"; }
     else if (state === 'ok'){ el.innerHTML = iconCheck + " Cevabınız kaydedildi"; }
     else if (state === 'exists'){ el.classList.add('info'); el.innerHTML = iconInfo + " Bu isim zaten kayıtlı. Cevabınız daha önce alınmış — teşekkürler."; }
-    else if (state === 'err'){ el.classList.add('err'); el.textContent = "Kayıt yapılamadı — lütfen bağlantıyı kontrol edin."; }
+    else if (state === 'err'){ el.classList.add('err'); el.textContent = "Kayıt yapılamadı — lütfen tekrar deneyin."; }
     else if (state === 'unconfigured'){ el.classList.add('err'); el.textContent = "Kurulum tamamlanmadı — cevap kaydedilmedi."; }
+  }
+
+  function unlockForRetry(){
+    locked = false; busy = false;
+    nameInput.disabled = false;
+    updateEnabled();
   }
 
   async function choose(a){
@@ -378,21 +386,23 @@
 
     if (!configured){ setStatus(statusEl, 'unconfigured'); locked = true; busy = false; return; }
 
-    // 1) İsim tabloda var mı?
-    setStatus(statusEl, 'checking');
-    const exists = await checkName(nameValue());
-    if (exists === true){
-      descEl.classList.add('hide');          // "Ne mutlu bize" vb. metni gizle
+    setStatus(statusEl, 'pending');
+    const res = await callServer({ mode: 'save', name: nameValue(), answer: attendValue });
+
+    if (res && res.status === 'exists'){
+      descEl.classList.add('hide');
       setStatus(statusEl, 'exists');
       locked = true; busy = false;
       return;
     }
-
-    // 2) Yoksa kaydet
-    setStatus(statusEl, 'pending');
-    const ok = await sendToSheet(attendValue);
-    setStatus(statusEl, ok ? 'ok' : 'err');
-    locked = true; busy = false;
+    if (res && res.status === 'saved'){
+      setStatus(statusEl, 'ok');
+      locked = true; busy = false;
+      return;
+    }
+    // Hata / cevap yok → mükerrer kayıt riski yok (sunucu yazmadı). Tekrar denesin.
+    setStatus(statusEl, 'err');
+    unlockForRetry();
   }
 
   nameInput.addEventListener('input', updateEnabled);
