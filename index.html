@@ -170,7 +170,7 @@
   .status{
     display: inline-flex; align-items: center; gap: 7px;
     font-size: 13px; font-weight: 600; color: var(--ok);
-    margin: 12px;
+    margin: 0;
   }
   .status svg{ width: 16px; height: 16px; flex: none; }
   .status.pending{ color: var(--ink-faint); }
@@ -179,10 +179,16 @@
   .reveal-text{ font-size: 14.5px; color: var(--ink-soft); line-height: 1.6; margin: 14px 0 0; }
   .reveal-text.hide{ display: none; }
   .map-panel{
+    display: block;
     background: var(--accent-soft); border: 1px solid var(--border);
     border-radius: 14px; padding: 18px 18px 16px;
     margin: 0 0 24px;
+    text-decoration: none; color: inherit; cursor: pointer;
+    transition: border-color .15s ease, transform .12s ease;
   }
+  .map-panel:hover{ border-color: var(--accent); }
+  .map-panel:hover .btn-map{ border-color: var(--accent); }
+  .map-panel:active{ transform: scale(0.99); }
   .map-glyph{ width: 22px; height: 22px; color: var(--accent); margin: 0 auto 8px; }
   .venue-label{ font-family: "Newsreader", Georgia, serif; font-style: italic; font-size: 17px; color: var(--ink); margin: 0 0 3px; }
   .venue-addr{ font-size: 13px; color: var(--ink-soft); margin: 0 0 14px; }
@@ -234,6 +240,7 @@
       <button class="choice no" id="btnNo" type="button" aria-pressed="false" disabled>Hayır</button>
     </div>
 
+
     <!-- Evet -->
     <div class="reveal" id="revealYes">
       <div class="reveal-inner">
@@ -251,13 +258,15 @@
       </div>
     </div>
 
-    <!-- Mekân ve harita: her zaman görünür -->
-    <a class="map-panel" href="https://www.google.com/maps/search/?api=1&amp;query=38.695241,29.717804" target="_blank" rel="noopener">
+    <!-- Mekân ve harita: her zaman görünür, tüm kart tıklanabilir -->
+    <a class="map-panel" href="https://www.google.com/maps/search/?api=1&amp;query=38.695241,29.717804" target="_blank" rel="noopener" aria-label="Nişan mekânını haritada aç: Banaz, Uşak">
       <svg class="map-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.1-7-11.2A7 7 0 0 1 19 9.8C19 14.9 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>
       <p class="venue-label">Nişan Mekânı</p>
       <p class="venue-addr">Banaz, Uşak</p>
+      <span class="btn btn-map">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l-5 2V6l5-2 6 2 5-2v14l-5 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg>
         Haritada Aç
+      </span>
     </a>
   </div>
 </div>
