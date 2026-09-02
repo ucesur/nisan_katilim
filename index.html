@@ -9,7 +9,8 @@
   KURULUM — cevaplar DOĞRUDAN Google E-Tablonuza yazılır (form yok)
   ==================================================================
   ADIM 1) Google E-Tablonuzu açın → üst menü: Uzantılar → Apps Komut Dosyası.
-  ADIM 2) Açılan editördeki her şeyi silin, aşağıdaki kodu yapıştırın:
+  ADIM 2) Açılan editördeki her şeyi silin, aşağıdaki kodun TAMAMINI yapıştırın:
+
       function doPost(e){
         var ss = SpreadsheetApp.getActiveSpreadsheet();
         var sh = ss.getSheetByName('Katılım');
@@ -18,13 +19,36 @@
         sh.appendRow([new Date(), p.name || '', p.answer || '']);
         return ContentService.createTextOutput('OK');
       }
+
+      function doGet(e){
+        var p = (e && e.parameter) || {};
+        var cb = p.callback || 'callback';
+        var ss = SpreadsheetApp.getActiveSpreadsheet();
+        var sh = ss.getSheetByName('Katılım');
+        var exists = false;
+        var last = sh ? sh.getLastRow() : 0;
+        if (sh && p.name && last >= 2){
+          var target = String(p.name).trim().toLowerCase();
+          var vals = sh.getRange(2, 2, last - 1, 1).getValues();
+          for (var i = 0; i < vals.length; i++){
+            if (String(vals[i][0]).trim().toLowerCase() === target){ exists = true; break; }
+          }
+        }
+        return ContentService
+          .createTextOutput(cb + '(' + JSON.stringify({ exists: exists }) + ')')
+          .setMimeType(ContentService.MimeType.JAVASCRIPT);
+      }
+
   ADIM 3) Sağ üstte "Dağıt" (Deploy) → "Yeni dağıtım" → tür: "Web uygulaması".
           - "Şu kimlikle çalıştır": Ben (kendiniz)
           - "Erişebilecek kişiler": Herkes (Anyone)
           Dağıt deyin, izin isterse onaylayın, size bir "Web uygulaması URL'si" verir.
-  ADIM 4) O URL'yi kopyalayıp aşağıdaki WEBAPP_URL tırnaklarının içine yapıştırın.
-  Not: Cevaplar E-Tablonuzda "Katılım" sekmesine (Tarih / Ad Soyad / Cevap)
-       satır satır düşer. Artık Google Form'a gerek yok.
+
+  >>> ÖNEMLİ: Daha önce dağıttıysanız, yeni doGet kodunun geçerli olması için
+      "Dağıt → Dağıtımları yönet → (kalem/düzenle) → Sürüm: Yeni sürüm → Dağıt"
+      yapın. URL aynı kalır, yeniden yapıştırmanıza gerek yok.
+
+  ADIM 4) URL'yi aşağıdaki WEBAPP_URL tırnaklarının içine yapıştırın.
   ==================================================================
 -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,500;1,600&family=Karla:wght@400;500;600;700&display=swap">
@@ -116,6 +140,7 @@
   }
   .field input::placeholder{ color: var(--ink-faint); }
   .field input:focus-visible{ border-color: var(--accent); outline: none; }
+  .field input:disabled{ opacity: 0.6; }
   .choices{ display: flex; gap: 10px; }
   .choice{
     flex: 1; font-family: inherit; font-size: 15px; font-weight: 600;
@@ -133,6 +158,7 @@
     margin: 12px 0 0; min-height: 16px; transition: color .2s ease;
   }
   .hint.warn{ color: var(--accent); }
+  .hint.info{ color: var(--gold); }
   .reveal{
     display: grid; grid-template-rows: 0fr; opacity: 0;
     transition: grid-template-rows .38s ease, opacity .32s ease .02s, margin-top .38s ease;
@@ -144,12 +170,14 @@
   .status{
     display: inline-flex; align-items: center; gap: 7px;
     font-size: 13px; font-weight: 600; color: var(--ok);
-    margin: 0;
+    margin: 12px;
   }
-  .status svg{ width: 16px; height: 16px; }
+  .status svg{ width: 16px; height: 16px; flex: none; }
   .status.pending{ color: var(--ink-faint); }
   .status.err{ color: var(--err); }
+  .status.info{ color: var(--gold); }
   .reveal-text{ font-size: 14.5px; color: var(--ink-soft); line-height: 1.6; margin: 14px 0 0; }
+  .reveal-text.hide{ display: none; }
   .map-panel{
     background: var(--accent-soft); border: 1px solid var(--border);
     border-radius: 14px; padding: 18px 18px 16px;
@@ -169,6 +197,7 @@
   .btn-map{ background: transparent; color: var(--accent); border-color: var(--border); width: 100%; }
   .btn-map:hover{ border-color: var(--accent); }
   .no-text{ font-family: "Newsreader", Georgia, serif; font-style: italic; font-size: 17px; color: var(--ink-soft); margin: 14px 0 0; }
+  .no-text.hide{ display: none; }
   .setup-warn{
     display: none;
     margin: 0 0 22px; padding: 12px 14px;
@@ -204,14 +233,13 @@
       <button class="choice yes" id="btnYes" type="button" aria-pressed="false" disabled>Evet</button>
       <button class="choice no" id="btnNo" type="button" aria-pressed="false" disabled>Hayır</button>
     </div>
-    
 
     <!-- Evet -->
     <div class="reveal" id="revealYes">
       <div class="reveal-inner">
         <div class="divider"></div>
         <p class="status" id="statusYes"></p>
-        <p class="reveal-text">Ne mutlu bize! Sizi orada görmek için sabırsızlanıyoruz.</p>
+        <p class="reveal-text" id="descYes">Ne mutlu bize! Sizi orada görmek için sabırsızlanıyoruz.</p>
       </div>
     </div>
     <!-- Hayır -->
@@ -219,16 +247,16 @@
       <div class="reveal-inner">
         <div class="divider"></div>
         <p class="status" id="statusNo"></p>
-        <p class="no-text">Sizi özleyeceğiz. Nazik cevabınız için teşekkür ederiz.</p>
+        <p class="no-text" id="descNo">Sizi özleyeceğiz. Nazik cevabınız için teşekkür ederiz.</p>
       </div>
     </div>
 
     <!-- Mekân ve harita: her zaman görünür -->
     <div class="map-panel">
+      <a class="btn btn-map" href="https://www.google.com/maps/search/?api=1&amp;query=38.695241,29.717804" target="_blank" rel="noopener">
       <svg class="map-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.1-7-11.2A7 7 0 0 1 19 9.8C19 14.9 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>
       <p class="venue-label">Nişan Mekânı</p>
       <p class="venue-addr">Banaz, Uşak</p>
-      <a class="btn btn-map" href="https://www.google.com/maps/search/?api=1&amp;query=38.695241,29.717804" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l-5 2V6l5-2 6 2 5-2v14l-5 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg>
         Haritada Aç
       </a>
@@ -254,23 +282,49 @@
   const revealNo  = document.getElementById('revealNo');
   const statusYes = document.getElementById('statusYes');
   const statusNo  = document.getElementById('statusNo');
+  const descYes = document.getElementById('descYes');
+  const descNo  = document.getElementById('descNo');
   let answer = null;
-  let locked = false;
+  let locked = false;   // cevap verildi, kilitlendi
+  let busy = false;     // kontrol/gönderim sürüyor
   function nameValue(){ return nameInput.value.trim(); }
   function hasName(){ return nameValue().length >= 2; }
+
   const iconCheck = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
   const iconDots  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>';
+  const iconInfo  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>';
+
   function updateEnabled(){
     const ok = hasName();
-    btnYes.disabled = !ok || locked;
-    btnNo.disabled = !ok || locked;
-    if (!answer){
+    btnYes.disabled = !ok || locked || busy;
+    btnNo.disabled = !ok || locked || busy;
+    if (!answer && !busy){
       hint.textContent = ok ? "Lütfen cevabınızı seçin." : "Cevap vermek için lütfen önce adınızı yazın.";
-      hint.classList.remove('warn');
+      hint.classList.remove('warn','info');
     }
   }
-  // Cevabı doğrudan E-Tabloya (Apps Script web uygulaması) yazar.
-  // GitHub Pages gibi normal barındırmada çalışır; claude.ai içinde çalışmaz.
+
+  // --- E-Tablodan ismin daha önce girilip girilmediğini kontrol et (JSONP) ---
+  function checkName(name){
+    return new Promise((resolve) => {
+      if (!configured){ resolve(null); return; }
+      const cb = 'jsonp_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+      let s;
+      const timer = setTimeout(() => { cleanup(); resolve(null); }, 9000);
+      function cleanup(){
+        try { delete window[cb]; } catch(e){ window[cb] = undefined; }
+        if (s && s.parentNode) s.parentNode.removeChild(s);
+        clearTimeout(timer);
+      }
+      window[cb] = (data) => { cleanup(); resolve(data && data.exists === true); };
+      s = document.createElement('script');
+      s.src = WEBAPP_URL.trim() + '?callback=' + cb + '&name=' + encodeURIComponent(name);
+      s.onerror = () => { cleanup(); resolve(null); };
+      document.body.appendChild(s);
+    });
+  }
+
+  // --- Cevabı doğrudan E-Tabloya yazar ---
   function sendToSheet(attendValue){
     if (!configured) return Promise.resolve(false);
     const body = new URLSearchParams({ name: nameValue(), answer: attendValue });
@@ -278,25 +332,30 @@
       .then(() => true)
       .catch(() => false);
   }
+
   function setStatus(el, state){
-    el.classList.remove('pending','err');
-    if (state === 'pending'){ el.classList.add('pending'); el.innerHTML = iconDots + " Kaydediliyor…"; }
+    el.classList.remove('pending','err','info');
+    if (state === 'checking'){ el.classList.add('pending'); el.innerHTML = iconDots + " Kontrol ediliyor…"; }
+    else if (state === 'pending'){ el.classList.add('pending'); el.innerHTML = iconDots + " Kaydediliyor…"; }
     else if (state === 'ok'){ el.innerHTML = iconCheck + " Cevabınız kaydedildi"; }
+    else if (state === 'exists'){ el.classList.add('info'); el.innerHTML = iconInfo + " Bu isim zaten kayıtlı. Cevabınız daha önce alınmış — teşekkürler."; }
     else if (state === 'err'){ el.classList.add('err'); el.textContent = "Kayıt yapılamadı — lütfen bağlantıyı kontrol edin."; }
     else if (state === 'unconfigured'){ el.classList.add('err'); el.textContent = "Kurulum tamamlanmadı — cevap kaydedilmedi."; }
   }
-  function choose(a){
-    if (locked) return;
+
+  async function choose(a){
+    if (locked || busy) return;
     if (!hasName()){
       hint.textContent = "Devam etmek için lütfen önce adınızı yazın.";
       hint.classList.add('warn');
       nameInput.focus();
       return;
     }
+    busy = true;
     answer = a;
-    locked = true;
     hint.textContent = "";
-    hint.classList.remove('warn');
+    hint.classList.remove('warn','info');
+
     const isYes = a === 'yes';
     btnYes.setAttribute('aria-pressed', String(isYes));
     btnNo.setAttribute('aria-pressed', String(!isYes));
@@ -305,12 +364,30 @@
     nameInput.disabled = true;
     revealYes.classList.toggle('open', isYes);
     revealNo.classList.toggle('open', !isYes);
+
     const statusEl = isYes ? statusYes : statusNo;
+    const descEl   = isYes ? descYes : descNo;
     const attendValue = isYes ? YES_VALUE : NO_VALUE;
-    if (!configured){ setStatus(statusEl, 'unconfigured'); return; }
+
+    if (!configured){ setStatus(statusEl, 'unconfigured'); locked = true; busy = false; return; }
+
+    // 1) İsim tabloda var mı?
+    setStatus(statusEl, 'checking');
+    const exists = await checkName(nameValue());
+    if (exists === true){
+      descEl.classList.add('hide');          // "Ne mutlu bize" vb. metni gizle
+      setStatus(statusEl, 'exists');
+      locked = true; busy = false;
+      return;
+    }
+
+    // 2) Yoksa kaydet
     setStatus(statusEl, 'pending');
-    sendToSheet(attendValue).then(ok => setStatus(statusEl, ok ? 'ok' : 'err'));
+    const ok = await sendToSheet(attendValue);
+    setStatus(statusEl, ok ? 'ok' : 'err');
+    locked = true; busy = false;
   }
+
   nameInput.addEventListener('input', updateEnabled);
   btnYes.addEventListener('click', () => choose('yes'));
   btnNo.addEventListener('click', () => choose('no'));
