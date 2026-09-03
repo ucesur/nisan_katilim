@@ -10,7 +10,6 @@
   ==================================================================
   ADIM 1) Google E-Tablonuzu açın → üst menü: Uzantılar → Apps Komut Dosyası.
   ADIM 2) Açılan editördeki her şeyi silin, aşağıdaki kodun TAMAMINI yapıştırın:
-
       function doPost(e){
         return handle_(e);
       }
@@ -48,21 +47,17 @@
           .createTextOutput(cb + '(' + JSON.stringify(out) + ')')
           .setMimeType(ContentService.MimeType.JAVASCRIPT);
       }
-
   ADIM 3) Sağ üstte "Dağıt" (Deploy) → "Yeni dağıtım" → tür: "Web uygulaması".
           - "Şu kimlikle çalıştır": Ben (kendiniz)
           - "Erişebilecek kişiler": HERKES  (mutlaka "Herkes", "Google hesabı olan herkes" DEĞİL)
           Dağıt deyin, izin isterse onaylayın, size bir "Web uygulaması URL'si" verir.
-
   >>> ÇOK ÖNEMLİ: Daha önce dağıttıysanız, yeni kodun geçerli olması için MUTLAKA
       "Dağıt → Dağıtımları yönet → (kalem/düzenle) → Sürüm: YENİ SÜRÜM → Dağıt"
       yapın. Aksi halde eski kod çalışmaya devam eder ve isim kontrolü işlemez.
       URL aynı kalır.
-
   TEST: Tarayıcıda şu adresi açın (URL'nizi yazın):
         .../exec?callback=test&name=deneme
         "test({"status":"ok","exists":false})" gibi bir cevap görürseniz kod çalışıyordur.
-
   ADIM 4) URL'yi aşağıdaki WEBAPP_URL tırnaklarının içine yapıştırın.
   ==================================================================
 -->
@@ -130,7 +125,7 @@
     text-align: center;
     overflow: hidden;
   }
-  .rings{ width: 46px; height: 28px; margin: 0 auto 18px; color: var(--gold); opacity: 0.9; }
+  .rings{ display: block; width: 78px; height: auto; margin: 0 auto 16px; }
   .eyebrow{
     font-size: 11.5px; font-weight: 600; letter-spacing: 0.24em;
     text-transform: uppercase; color: var(--gold); margin: 0 0 14px;
@@ -238,12 +233,39 @@
       E-Tablonuzun "web uygulaması" adresini yapıştırın. (Adımlar dosyanın en üstünde.)
       Bu yapılmadan cevaplar tabloya yazılmaz.
     </div>
-    <svg class="rings" viewBox="0 0 46 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <circle cx="17" cy="16" r="10.5" stroke="currentColor" stroke-width="1.6"/>
-      <circle cx="29" cy="16" r="10.5" stroke="currentColor" stroke-width="1.6"/>
+
+    <!-- Nişan yüzükleri amblemi -->
+    <svg class="rings" viewBox="0 0 96 90" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="rose" x1="20" y1="6" x2="78" y2="86" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#f0c3ad"/>
+          <stop offset="0.5" stop-color="#cf8f79"/>
+          <stop offset="1" stop-color="#a96754"/>
+        </linearGradient>
+      </defs>
+      <!-- pırıltılar -->
+      <g stroke="url(#rose)" stroke-width="2.4" stroke-linecap="round">
+        <line x1="48" y1="3" x2="48" y2="12"/>
+        <line x1="33" y1="7" x2="37" y2="14"/>
+        <line x1="63" y1="7" x2="59" y2="14"/>
+        <line x1="23" y1="17" x2="29" y2="21"/>
+        <line x1="73" y1="17" x2="67" y2="21"/>
+      </g>
+      <!-- pırlanta (brilliant kesim) -->
+      <g stroke="url(#rose)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" fill="none">
+        <path d="M41 18 H55 L60 26 L48 44 L36 26 Z"/>
+        <path d="M36 26 H60"/>
+        <path d="M41 18 L45 26 L48 44 M55 18 L51 26 L48 44 M45 26 H51"/>
+      </g>
+      <!-- birbirine geçmiş iki yüzük -->
+      <g stroke="url(#rose)" stroke-width="4.4" fill="none">
+        <ellipse cx="38" cy="62" rx="17" ry="19"/>
+        <ellipse cx="58" cy="62" rx="17" ry="19"/>
+      </g>
     </svg>
+
     <p class="eyebrow">Nişan Daveti</p>
-    <h1>3 Ekim'deki nişana katılacak mısınız?</h1>
+    <h1>3 Ekim'deki nişanımıza katılacak mısınız?</h1>
     <div class="field">
       <label for="guestName">Adınız Soyadınız</label>
       <input id="guestName" type="text" placeholder="Örn. Ayşe Yılmaz" autocomplete="name" spellcheck="false" maxlength="60">
@@ -310,7 +332,6 @@
   const iconCheck = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
   const iconDots  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>';
   const iconInfo  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>';
-
   function updateEnabled(){
     const ok = hasName();
     btnYes.disabled = !ok || locked || busy;
@@ -320,7 +341,6 @@
       hint.classList.remove('warn','info');
     }
   }
-
   // --- Tek çağrıda: sunucuda isim kontrolü + (yoksa) kayıt. JSONP ile okunur. ---
   function callServer(params){
     return new Promise((resolve) => {
@@ -342,7 +362,6 @@
       document.body.appendChild(s);
     });
   }
-
   function setStatus(el, state){
     el.classList.remove('pending','err','info');
     if (state === 'pending'){ el.classList.add('pending'); el.innerHTML = iconDots + " Kaydediliyor…"; }
@@ -351,13 +370,11 @@
     else if (state === 'err'){ el.classList.add('err'); el.textContent = "Kayıt yapılamadı — lütfen tekrar deneyin."; }
     else if (state === 'unconfigured'){ el.classList.add('err'); el.textContent = "Kurulum tamamlanmadı — cevap kaydedilmedi."; }
   }
-
   function unlockForRetry(){
     locked = false; busy = false;
     nameInput.disabled = false;
     updateEnabled();
   }
-
   async function choose(a){
     if (locked || busy) return;
     if (!hasName()){
@@ -370,7 +387,6 @@
     answer = a;
     hint.textContent = "";
     hint.classList.remove('warn','info');
-
     const isYes = a === 'yes';
     btnYes.setAttribute('aria-pressed', String(isYes));
     btnNo.setAttribute('aria-pressed', String(!isYes));
@@ -379,16 +395,12 @@
     nameInput.disabled = true;
     revealYes.classList.toggle('open', isYes);
     revealNo.classList.toggle('open', !isYes);
-
     const statusEl = isYes ? statusYes : statusNo;
     const descEl   = isYes ? descYes : descNo;
     const attendValue = isYes ? YES_VALUE : NO_VALUE;
-
     if (!configured){ setStatus(statusEl, 'unconfigured'); locked = true; busy = false; return; }
-
     setStatus(statusEl, 'pending');
     const res = await callServer({ mode: 'save', name: nameValue(), answer: attendValue });
-
     if (res && res.status === 'exists'){
       descEl.classList.add('hide');
       setStatus(statusEl, 'exists');
@@ -404,7 +416,6 @@
     setStatus(statusEl, 'err');
     unlockForRetry();
   }
-
   nameInput.addEventListener('input', updateEnabled);
   btnYes.addEventListener('click', () => choose('yes'));
   btnNo.addEventListener('click', () => choose('no'));
